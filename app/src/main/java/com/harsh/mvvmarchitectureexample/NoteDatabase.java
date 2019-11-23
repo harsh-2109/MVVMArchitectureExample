@@ -12,25 +12,25 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 @Database(entities = {Note.class}, version = 1)
 public abstract class NoteDatabase extends RoomDatabase {
 
-    private static NoteDatabase instace;
+    private static NoteDatabase instance;
 
     public abstract NoteDao noteDao();
 
-    public static synchronized NoteDatabase getInstance(Context context) {
-        if (instace == null) {
-            instace = Room.databaseBuilder(context.getApplicationContext(), NoteDatabase.class, "note_database")
+    static synchronized NoteDatabase getInstance(Context context) {
+        if (instance == null) {
+            instance = Room.databaseBuilder(context.getApplicationContext(), NoteDatabase.class, "note_database")
                     .fallbackToDestructiveMigration()
                     .addCallback(callback)
                     .build();
         }
-        return instace;
+        return instance;
     }
 
     private static RoomDatabase.Callback callback=new RoomDatabase.Callback(){
         @Override
         public void onCreate(@NonNull SupportSQLiteDatabase db) {
             super.onCreate(db);
-            new PopulateDbAsyncTask(instace);
+            new PopulateDbAsyncTask(instance).execute();
         }
     };
 
@@ -38,7 +38,7 @@ public abstract class NoteDatabase extends RoomDatabase {
 
         private NoteDao noteDao;
 
-        public PopulateDbAsyncTask(NoteDatabase db) {
+        PopulateDbAsyncTask(NoteDatabase db) {
             this.noteDao = db.noteDao();
         }
 
@@ -47,6 +47,7 @@ public abstract class NoteDatabase extends RoomDatabase {
             noteDao.insert(new Note("Title 1", "Description1", 1));
             noteDao.insert(new Note("Title 2", "Description2", 2));
             noteDao.insert(new Note("Title 3", "Description3", 3));
+            noteDao.insert(new Note("Title 4", "Description4", 4));
             return null;
         }
     }
